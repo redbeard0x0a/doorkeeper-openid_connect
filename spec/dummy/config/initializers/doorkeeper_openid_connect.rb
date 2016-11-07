@@ -51,7 +51,7 @@ twIDAQAB
     resource_owner.current_sign_in_at
   end
 
-  reauthenticate_resource_owner do |_resource_owner|
+  reauthenticate_resource_owner do |_resource_owner, _return_to|
     redirect_to '/reauthenticate'
   end
 

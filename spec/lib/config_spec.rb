@@ -3,11 +3,6 @@ require 'rails_helper'
 describe Doorkeeper::OpenidConnect, 'configuration' do
   subject { Doorkeeper::OpenidConnect.configuration }
 
-  after :each do
-    load "#{Rails.root}/config/initializers/doorkeeper.rb"
-    load "#{Rails.root}/config/initializers/doorkeeper_openid_connect.rb"
-  end
-
   describe '#configure' do
     it 'fails if not set to :active_record' do
       # stub ORM setup to avoid Doorkeeper exceptions
@@ -20,7 +15,7 @@ describe Doorkeeper::OpenidConnect, 'configuration' do
 
       expect do
         Doorkeeper::OpenidConnect.configure {}
-      end.to raise_error Doorkeeper::OpenidConnect::ConfigurationError
+      end.to raise_error Doorkeeper::OpenidConnect::Errors::InvalidConfiguration
     end
   end
 
