@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 describe Doorkeeper::OpenidConnect::RpLogoutController, type: :controller do
-  let(:client) { create :application }
+  let(:post_logout_redirect_uri) { 'https://test.venuenext.net' }
+  let(:client) { create :application, redirect_uri: post_logout_redirect_uri }
   let(:user)   { create :user, name: 'Joe' }
   let(:token)  { create :access_token, application: client, resource_owner_id: user.id }
 
@@ -12,20 +13,25 @@ describe Doorkeeper::OpenidConnect::RpLogoutController, type: :controller do
         Doorkeeper::OpenidConnect.configure do
           logout_resource_owner(&block)
         end
+        Doorkeeper.configure do
+          force_ssl_in_redirect_uri false
+        end
       end
 
-      it 'redirects to the specified post_logout_redirect_uri' do 
-        get :show, post_logout_redirect_uri: 'https://test.venuenext.net'
+      it 'redirects to the specified post_logout_redirect_uri' do
+        post_logout_redirect_uri = 'http://localhost:3000'
+        token.application.update!(redirect_uri: post_logout_redirect_uri)
+        get :show, post_logout_redirect_uri: post_logout_redirect_uri, id_token_hint: token.token
 
         expect(response.status).to eq 302
-        expect(response).to redirect_to('https://test.venuenext.net')
+        expect(response).to redirect_to(post_logout_redirect_uri)
       end
 
       it 'redirects to the specified post_logout_redirect_uri with the state' do
-        get :show, post_logout_redirect_uri: 'https://test.venuenext.net', state: 'test123'
+        get :show, post_logout_redirect_uri: 'https://test.venuenext.net', state: 'test123', id_token_hint: token.token
 
         expect(response.status).to eq 302
-        expect(response).to redirect_to('https://test.venuenext.net?state=test123')
+        expect(response).to redirect_to("#{post_logout_redirect_uri}?state=test123")
       end
 
       it 'replaces the state in an encoded post_logout_redirect_uri' do
