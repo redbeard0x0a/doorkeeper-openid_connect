@@ -44,14 +44,11 @@ module Doorkeeper
               uri_checker = Doorkeeper::OAuth::Helpers::URIChecker
               if uri_checker.native_uri?(redirect_uri.to_s) || 
                   uri_checker.valid_for_authorization?(redirect_uri.to_s, application.redirect_uri)
-                # Doorkeeper::OAuth::Helpers::URIChecker.native_uri?(redirect_uri.to_s) ||
-                # Doorkeeper::OAuth::Helpers::URIChecker.valid_for_authorization?())
-
               
-              # HACK: quick check to make sure that the domain is a venuenext.net domain.
-              # TODO: this needs to be a property on the Doorkeeper::Application (allowed redirect_uris)
-              # it needs to work similarly to how redirect_uri validation works in oauth2.
-              # if redirect_uri.host.ends_with?('venuenext.net')
+                # HACK: quick check to make sure that the domain is a venuenext.net domain.
+                # TODO: this needs to be a property on the Doorkeeper::Application (allowed redirect_uris)
+                # it needs to work similarly to how redirect_uri validation works in oauth2.
+
                 # Handle state parameter
                 if params[:state].present?
                   redirect_uri = uri_query_merge(redirect_uri, state: params[:state])
@@ -67,12 +64,11 @@ module Doorkeeper
                 end
                 redirect_to redirect_uri.to_s
                 return
+              else
+                render json: { errors: { post_logout_redirect_uri: ["Unauthorized Post Logout Redirect URI."] } }, status: :bad_request
+                return
               end
-            else
-              render json: { errors: { post_logout_redirect_uri: ["Unauthorized Post Logout Redirect URI."] } }, status: :bad_request
-              return
             end
-
           rescue URI::InvalidURIError => e
             render json: { errors: { post_logout_redirect_uri: ["Invalid URI"] } }, status: :bad_request
             return
